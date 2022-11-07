@@ -23,6 +23,9 @@ import java.time.format.DateTimeFormatter;
  * Review the tips in the document Encapsulation Checklist if needed.
  */
 public class Employee {
+    private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("M/d/yy");
+    private static final short SSN_LENGTH = 14;
+
     private String firstName;
     private String lastName;
     private String ssn;
@@ -33,7 +36,17 @@ public class Employee {
     private String cubeId;
     private LocalDate orientationDate;
 
-    public Employee(String firstName, String lastName, String ssn) {
+    public Employee(String firstName, String lastName, String ssn){
+        if (firstName.length() == 0 || lastName.length() == 0) {
+            throw new IllegalArgumentException("Name can't have an empty part!");
+        }
+        ssn = ssn.replace("-","");
+        this.setSsn(ssn);
+        try{
+            Float.parseFloat(ssn);
+        }catch(NumberFormatException e){
+            throw new IllegalArgumentException("SSN has to be a number!");
+        }
         this.firstName = firstName;
         this.lastName = lastName;
         this.ssn = ssn;
@@ -43,20 +56,14 @@ public class Employee {
     // would only do this once, upon being hired.
     public void meetWithHrForBenefitAndSalaryInfo() {
         metWithHr = true;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yy");
-        String fmtDate = formatter.format(orientationDate);
-        System.out.println(firstName + " " + lastName + " met with HR on "
-                + fmtDate);
+        printUserUpdateWithDate("met with HR on"+cubeId, orientationDate);
     }
 
     // Assume this must be performed second, and assume that an employee
     // would only do this once, upon being hired.
     public void meetDepartmentStaff() {
         metDeptStaff = true;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yy");
-        String fmtDate = formatter.format(orientationDate);
-        System.out.println(firstName + " " + lastName + " met with dept staff on "
-                + fmtDate);
+        printUserUpdateWithDate("met with dept staff on", orientationDate);
     }
 
     // Assume this must be performed third. And assume that because department
@@ -64,23 +71,37 @@ public class Employee {
     // independently from other classes.
     public void reviewDeptPolicies() {
         reviewedDeptPolicies = true;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yy");
-        String fmtDate = formatter.format(orientationDate);
-        System.out.println(firstName + " " + lastName + " reviewed dept policies on "
-                + fmtDate);
+        printUserUpdateWithDate("reviewed dept policies"+cubeId, orientationDate);
     }
 
     // Assume this must be performed fourth. And assume that because employees
     // sometimes change office locations that this method may need to be called 
     // independently from other classes.
     public void moveIntoCubicle(String cubeId) {
-        this.cubeId = cubeId;
+        this.cubeId = this.getCubeId();
         this.movedIn = true;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yy");
-        String fmtDate = formatter.format(orientationDate);
-        System.out.println(firstName + " " + lastName + " moved into cubicle "
-                + cubeId + " on " + fmtDate);
+        printUserUpdateWithDate("moved into cubicle "+cubeId, orientationDate);
     }
+
+//=============
+    private void printUserUpdateWithDate(String statement, LocalDate lclDte){
+        if (statement.length() == 0) {
+            throw new IllegalArgumentException("Statement cannot be empty!");
+        }
+        System.out.println(this.getFirstName()+" "+this.getLastName()+" "+statement+" on "+formatDate(lclDte));
+    }
+
+    private String formatDate(LocalDate lclDte){
+        if(lclDte == null){
+            throw new IllegalArgumentException("Date cannot be null!");
+        }
+        if(LocalDate.now().isBefore(lclDte)){
+            throw new IllegalArgumentException("Date cannot be before today");
+        }
+        return FORMATTER.format(lclDte);
+    }
+
+
 
     public String getFirstName() {
         return firstName;
@@ -106,7 +127,12 @@ public class Employee {
     }
 
     public void setSsn(String ssn) {
-        this.ssn = ssn;
+        if (ssn.length() == 0) {
+            throw new IllegalArgumentException("SSN cannot be blank!");
+        }
+        if (ssn.length() != SSN_LENGTH) {
+            throw new IllegalArgumentException("SSN must be "+SSN_LENGTH+" digits long!");
+        }
     }
 
     public boolean hasMetWithHr() {

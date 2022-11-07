@@ -47,7 +47,6 @@ public class Employee {
     private boolean movedIn;
     private String cubeId;
     private LocalDate orientationDate;
-    private final CommandLineOutputService output = new CommandLineOutputService();
 
     public Employee(String firstName, String lastName, String ssn) {
         // Using setter method guarantees validation will be performed
@@ -91,8 +90,7 @@ public class Employee {
     // doFirstTimeOrientation()
     private void meetWithHrForBenefitAndSalaryInfo() {
         metWithHr = true;
-        output.simpleOutput(firstName + " " + lastName + " met with HR on "
-                + getFormattedDate());
+        outputNameWithStatement(" met with HR on "+getFormattedDate());
     }
 
     // Assume this must be performed second, and assume that an employee
@@ -102,7 +100,7 @@ public class Employee {
     // doFirstTimeOrientation()
     private void meetDepartmentStaff() {
         metDeptStaff = true;
-        System.out.println(firstName + " " + lastName + " met with dept staff on "
+        outputNameWithStatement("met with dept staff on "
                 + getFormattedDate());
     }
 
@@ -111,7 +109,7 @@ public class Employee {
     // independently from other classes.
     public void reviewDeptPolicies() {
         reviewedDeptPolicies = true;
-        System.out.println(firstName + " " + lastName + " reviewed dept policies on "
+        outputNameWithStatement("reviewed dept policies on "
                 + getFormattedDate());
     }
 
@@ -122,11 +120,21 @@ public class Employee {
         setCubeId(cubeId);
 
         this.movedIn = true;
-        System.out.println(firstName + " " + lastName + " moved into cubicle "
-                + cubeId + " on " + getFormattedDate());
+        outputNameWithStatement("moved into cubicle "+cubeId+" on "+getFormattedDate());
     }
 
-    public String getFirstName() {
+
+    private void outputNameWithStatement(String statement){
+        outputStatement(this.getFirstName()+" "+this.lastName+" "+statement);
+    }
+    private void outputStatement(String statement){
+        if(statement == null || statement.isBlank()){
+            throw new IllegalArgumentException("Statement cannot be null or blank!");
+        }
+        CommandLineOutputService.simpleOutput(statement);
+    }
+
+    public String getFirstName(){
         return firstName;
     }
 
@@ -147,7 +155,7 @@ public class Employee {
 
     public void setLastName(String lastName) {
         if (lastName == null || lastName.isBlank()) {
-            System.out.println("last name is required");
+            outputStatement("last name is required");
         }
         this.lastName = lastName;
     }
@@ -158,7 +166,7 @@ public class Employee {
 
     public void setSsn(String ssn) {
         if (ssn == null || ssn.length() < 9 || ssn.length() > 11) { // Magic numbers!
-            System.out.println("ssn is required and must be "
+            outputStatement("ssn is required and must be "
                     + "between 9 and 11 characters (if hyphens are used)");
         }
         this.ssn = ssn;
@@ -186,7 +194,7 @@ public class Employee {
 
     public void setCubeId(String cubeId) {
         if (cubeId == null || cubeId.isBlank()) {
-            System.out.println("cube id is required");
+            outputStatement("cube id is required");
         }
         this.cubeId = cubeId;
     }
